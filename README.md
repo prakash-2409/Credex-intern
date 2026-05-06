@@ -1,4 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Credex AI Spend Audit
+
+## Summary
+
+This project is a public AI spend audit for the Credex internship assignment. It lets a visitor enter the AI tools their team uses, compares the current spend against hardcoded pricing rules, and generates a shareable result page with a lead capture flow.
+
+## Screenshots
+
+## Quick Start
+
+1. Install dependencies with `npm install`.
+2. Copy `.env.example` to `.env.local` and set the Supabase, Anthropic, Resend, and site URL values.
+3. Run `npm run dev`.
+4. Open the landing page, submit an audit, and review the shareable result URL.
+
+## Decisions
+
+1. The audit engine is pure and deterministic so pricing decisions are reproducible.
+2. The summary paragraph is the only AI-generated part of the flow.
+3. Supabase stores audits and leads because the assignment requires a shareable result and a lead table.
+4. The lead gate uses a honeypot and middleware rate limiting instead of heavier auth.
+5. The public result page keeps personal data out of the URL and OG metadata.
+
+## Deployed URL
+
+## Notes
+
+See [ARCHITECTURE.md](ARCHITECTURE.md), [TESTS.md](TESTS.md), and [PRICING_DATA.md](PRICING_DATA.md) for implementation details.This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
