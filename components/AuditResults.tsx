@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +10,15 @@ import type { AuditOutcome } from "@/lib/auditEngine";
 import { formatCurrency } from "@/lib/utils";
 import { ShareButton } from "@/components/ShareButton";
 import { SummaryFallback } from "@/components/SummaryFallback";
-import { DownloadPDF } from "@/components/DownloadPDF";
-import { BenchmarkDisplay } from "@/components/BenchmarkDisplay";
 import { calculateBenchmark } from "@/lib/benchmark";
+
+const DownloadPDF = dynamic(() => import("@/components/DownloadPDF").then((module) => module.DownloadPDF), {
+  ssr: false,
+});
+
+const BenchmarkDisplay = dynamic(() => import("@/components/BenchmarkDisplay").then((module) => module.BenchmarkDisplay), {
+  ssr: false,
+});
 
 interface AuditResultsProps {
   auditId: string;

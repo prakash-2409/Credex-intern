@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
+import { applyCorsHeaders, createCorsOptionsResponse } from "@/lib/cors";
 import { buildSummaryFallback, buildSummaryPrompt } from "@/lib/summary";
 import type { AuditOutcome } from "@/lib/auditEngine";
 import { useCaseOptions } from "@/lib/pricingData";
@@ -26,6 +27,10 @@ const summaryRequestSchema = z.object({
   }) satisfies z.ZodType<AuditOutcome>,
 });
 
+export async function OPTIONS() {
+  return createCorsOptionsResponse();
+}
+
 export async function POST(request: NextRequest) {
   let fallback = "";
   try {
@@ -40,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ summary: fallback, source: "fallback", reason: "missing_api_key" });
+      return applyCorsHeaders(NextResponse.json({ summary: fallback, source: "fallback", reason: "missing_api_key" }));
     }
 
     const client = new Anthropic({ apiKey });
@@ -65,18 +70,18 @@ export async function POST(request: NextRequest) {
       .trim();
 
     if (!summary) {
-      return NextResponse.json({ summary: fallback, source: "fallback", reason: "empty_ai_response" });
+      return applyCorsHeaders(NextResponse.json({ summary: fallback, source: "fallback", reason: "empty_ai_response" }));
     }
 
-    return NextResponse.json({ summary, source: "live" });
+    return applyCorsHeaders(NextResponse.json({ summary, source: "live" }));
   } catch {
-    return NextResponse.json(
+    return applyCorsHeaders(NextResponse.json(
       {
         summary: fallback || "AI summary is temporarily unavailable. Using deterministic fallback summary.",
         source: "fallback",
         reason: "request_failed",
       },
       { status: 200, headers: { "x-summary-fallback": "true" } },
-    );
+    ));
   }
 }

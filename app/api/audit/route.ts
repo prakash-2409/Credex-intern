@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
+import { applyCorsHeaders, createCorsOptionsResponse } from "@/lib/cors";
 import { runAudit } from "@/lib/auditEngine";
 import { saveAudit, recordReferral } from "@/lib/auditStore";
 import { buildSummaryFallback } from "@/lib/summary";
@@ -21,6 +22,10 @@ const auditRequestSchema = z.object({
   ).min(1),
   ref: z.string().optional(),
 });
+
+export async function OPTIONS() {
+  return createCorsOptionsResponse();
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,7 +69,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    return applyCorsHeaders(NextResponse.json({
       auditId,
       publicUrl: `/audit/${auditId}`,
       teamSize: parsed.teamSize,
@@ -73,9 +78,9 @@ export async function POST(request: NextRequest) {
       summaryFallback,
       persisted,
       referralCode,
-    });
+    }));
   } catch (error) {
     const message = error instanceof z.ZodError ? error.issues[0]?.message ?? "Invalid audit payload." : "Unable to run audit.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return applyCorsHeaders(NextResponse.json({ error: message }, { status: 400 }));
   }
 }

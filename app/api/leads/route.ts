@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
+import { applyCorsHeaders, createCorsOptionsResponse } from "@/lib/cors";
 import { getAuditById, saveLead } from "@/lib/auditStore";
 import { getResendClient } from "@/lib/resendClient";
 
@@ -11,6 +12,10 @@ const leadSchema = z.object({
   auditId: z.string().min(6),
   honeypot: z.string().optional().or(z.literal("")),
 });
+
+export async function OPTIONS() {
+  return createCorsOptionsResponse();
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,9 +53,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ ok: stored });
+    return applyCorsHeaders(NextResponse.json({ ok: stored }));
   } catch (error) {
     const message = error instanceof z.ZodError ? error.issues[0]?.message ?? "Invalid lead payload." : "Unable to save lead.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return applyCorsHeaders(NextResponse.json({ error: message }, { status: 400 }));
   }
 }
