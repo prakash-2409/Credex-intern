@@ -43,7 +43,122 @@ export interface ToolDefinition {
   plans: ToolPlan[];
 }
 
+/**
+ * Placeholder pricing reference kept in sync with [PRICING_DATA.md](../PRICING_DATA.md).
+ * Replace the placeholder price strings with verified values before submission.
+ */
+export interface PricingReferencePlan {
+  plan: string;
+  price: string;
+  sourceUrl: string;
+  verifiedOn: string;
+}
+
+export interface PricingReferenceTool {
+  label: string;
+  sourceUrl: string;
+  verifiedOn: string;
+  plans: PricingReferencePlan[];
+}
+
 const verifiedOn = "2026-05-06";
+const placeholderVerifiedOn = "YYYY-MM-DD";
+
+/**
+ * Machine-readable placeholder pricing reference for manual verification.
+ * This is separate from the live audit catalog so the current tests keep using the
+ * verified numeric values until the placeholders are replaced.
+ */
+export const pricingReferenceCatalog: Record<ToolKey, PricingReferenceTool> = {
+  cursor: {
+    label: "Cursor",
+    sourceUrl: "https://cursor.com/pricing",
+    verifiedOn: placeholderVerifiedOn,
+    plans: [
+      { plan: "Hobby", price: "$XX.XX / month", sourceUrl: "https://cursor.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Pro", price: "$XX.XX / month", sourceUrl: "https://cursor.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Pro+", price: "$XX.XX / month", sourceUrl: "https://cursor.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Teams", price: "$XX.XX / user / month", sourceUrl: "https://cursor.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Ultra", price: "$XX.XX / month", sourceUrl: "https://cursor.com/pricing", verifiedOn: placeholderVerifiedOn },
+    ],
+  },
+  githubCopilot: {
+    label: "GitHub Copilot",
+    sourceUrl: "https://github.com/features/copilot/plans",
+    verifiedOn: placeholderVerifiedOn,
+    plans: [
+      { plan: "Free", price: "$XX.XX / month", sourceUrl: "https://github.com/features/copilot/plans", verifiedOn: placeholderVerifiedOn },
+      { plan: "Pro", price: "$XX.XX / user / month", sourceUrl: "https://github.com/features/copilot/plans", verifiedOn: placeholderVerifiedOn },
+      { plan: "Pro+", price: "$XX.XX / user / month", sourceUrl: "https://github.com/features/copilot/plans", verifiedOn: placeholderVerifiedOn },
+      { plan: "Business", price: "$XX.XX / user / month", sourceUrl: "https://github.com/features/copilot/plans", verifiedOn: placeholderVerifiedOn },
+    ],
+  },
+  claude: {
+    label: "Claude",
+    sourceUrl: "https://claude.com/pricing",
+    verifiedOn: placeholderVerifiedOn,
+    plans: [
+      { plan: "Free", price: "$XX.XX / month", sourceUrl: "https://claude.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Pro", price: "$XX.XX / month", sourceUrl: "https://claude.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Max 5x", price: "$XX.XX / month", sourceUrl: "https://claude.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Team Standard", price: "$XX.XX / seat / month", sourceUrl: "https://claude.com/pricing/team", verifiedOn: placeholderVerifiedOn },
+      { plan: "Team Premium", price: "$XX.XX / seat / month", sourceUrl: "https://claude.com/pricing/team", verifiedOn: placeholderVerifiedOn },
+    ],
+  },
+  chatgpt: {
+    label: "ChatGPT",
+    sourceUrl: "https://chatgpt.com/pricing",
+    verifiedOn: placeholderVerifiedOn,
+    plans: [
+      { plan: "Free", price: "$XX.XX / month", sourceUrl: "https://chatgpt.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Go", price: "$XX.XX / month", sourceUrl: "https://chatgpt.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Plus", price: "$XX.XX / month", sourceUrl: "https://chatgpt.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Pro", price: "$XX.XX / month", sourceUrl: "https://chatgpt.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Business", price: "$XX.XX / user / month", sourceUrl: "https://chatgpt.com/pricing", verifiedOn: placeholderVerifiedOn },
+    ],
+  },
+  anthropicApi: {
+    label: "Anthropic API",
+    sourceUrl: "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+    verifiedOn: placeholderVerifiedOn,
+    plans: [
+      { plan: "Claude Haiku 4.5", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://platform.claude.com/docs/en/docs/about-claude/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Claude Sonnet 4.6", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://platform.claude.com/docs/en/docs/about-claude/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Claude Opus 4.7", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://platform.claude.com/docs/en/docs/about-claude/pricing", verifiedOn: placeholderVerifiedOn },
+    ],
+  },
+  openaiApi: {
+    label: "OpenAI API",
+    sourceUrl: "https://developers.openai.com/api/docs/pricing",
+    verifiedOn: placeholderVerifiedOn,
+    plans: [
+      { plan: "gpt-5.4-mini", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://developers.openai.com/api/docs/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "gpt-5.4", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://developers.openai.com/api/docs/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "gpt-5.5", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://developers.openai.com/api/docs/pricing", verifiedOn: placeholderVerifiedOn },
+    ],
+  },
+  gemini: {
+    label: "Gemini",
+    sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing",
+    verifiedOn: placeholderVerifiedOn,
+    plans: [
+      { plan: "Gemini 2.5 Flash-Lite", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Gemini 2.5 Flash", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Gemini 2.5 Pro", price: "$XX.XX / MTok in, $XX.XX / MTok out", sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing", verifiedOn: placeholderVerifiedOn },
+    ],
+  },
+  windsurf: {
+    label: "Windsurf",
+    sourceUrl: "https://windsurf.com/pricing",
+    verifiedOn: placeholderVerifiedOn,
+    plans: [
+      { plan: "Free", price: "$XX.XX / month", sourceUrl: "https://windsurf.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Pro", price: "$XX.XX / month", sourceUrl: "https://windsurf.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Max", price: "$XX.XX / month", sourceUrl: "https://windsurf.com/pricing", verifiedOn: placeholderVerifiedOn },
+      { plan: "Teams", price: "$XX.XX / user / month", sourceUrl: "https://windsurf.com/pricing", verifiedOn: placeholderVerifiedOn },
+    ],
+  },
+};
 
 export const toolCatalog: Record<ToolKey, ToolDefinition> = {
   cursor: {

@@ -1,73 +1,77 @@
 # Pricing Data
 
+Every number must be verified against the official pricing page before submission.
+
+<!-- TODO: verify official price and replace -->
+
 ## Cursor
 
-| Plan | Price | Source | Verified |
-| --- | ---: | --- | --- |
-| Hobby | $0 | https://cursor.com/pricing | 2026-05-06 |
-| Pro | $20 | https://cursor.com/pricing | 2026-05-06 |
-| Pro+ | $60 | https://cursor.com/pricing | 2026-05-06 |
-| Teams | $40 / user | https://cursor.com/pricing | 2026-05-06 |
-| Ultra | $200 | https://cursor.com/pricing | 2026-05-06 |
+| Plan | Price | Source URL | Verified |
+| --- | --- | --- | --- |
+| Hobby | $XX.XX / month | https://cursor.com/pricing | YYYY-MM-DD |
+| Pro | $XX.XX / month | https://cursor.com/pricing | YYYY-MM-DD |
+| Pro+ | $XX.XX / month | https://cursor.com/pricing | YYYY-MM-DD |
+| Teams | $XX.XX / user / month | https://cursor.com/pricing | YYYY-MM-DD |
+| Ultra | $XX.XX / month | https://cursor.com/pricing | YYYY-MM-DD |
 
 ## GitHub Copilot
 
-| Plan | Price | Source | Verified |
-| --- | ---: | --- | --- |
-| Free | $0 | https://github.com/features/copilot/plans | 2026-05-06 |
-| Pro | $10 / user | https://github.com/features/copilot/plans | 2026-05-06 |
-| Pro+ | $39 / user | https://github.com/features/copilot/plans | 2026-05-06 |
-| Business | $19 / user | https://github.com/features/copilot/plans | 2026-05-06 |
+| Plan | Price | Source URL | Verified |
+| --- | --- | --- | --- |
+| Free | $XX.XX / month | https://github.com/features/copilot/plans | YYYY-MM-DD |
+| Pro | $XX.XX / user / month | https://github.com/features/copilot/plans | YYYY-MM-DD |
+| Pro+ | $XX.XX / user / month | https://github.com/features/copilot/plans | YYYY-MM-DD |
+| Business | $XX.XX / user / month | https://github.com/features/copilot/plans | YYYY-MM-DD |
 
 ## Claude
 
-| Plan | Price | Source | Verified |
-| --- | ---: | --- | --- |
-| Free | $0 | https://claude.com/pricing | 2026-05-06 |
-| Pro | $20 | https://claude.com/pricing | 2026-05-06 |
-| Max 5x | $100 | https://claude.com/pricing | 2026-05-06 |
-| Team Standard | $25 / seat | https://claude.com/pricing/team | 2026-05-06 |
-| Team Premium | $125 / seat | https://claude.com/pricing/team | 2026-05-06 |
+| Plan | Price | Source URL | Verified |
+| --- | --- | --- | --- |
+| Free | $XX.XX / month | https://claude.com/pricing | YYYY-MM-DD |
+| Pro | $XX.XX / month | https://claude.com/pricing | YYYY-MM-DD |
+| Max 5x | $XX.XX / month | https://claude.com/pricing | YYYY-MM-DD |
+| Team Standard | $XX.XX / seat / month | https://claude.com/pricing/team | YYYY-MM-DD |
+| Team Premium | $XX.XX / seat / month | https://claude.com/pricing/team | YYYY-MM-DD |
 
 ## ChatGPT
 
-| Plan | Price | Source | Verified |
-| --- | ---: | --- | --- |
-| Free | $0 | https://chatgpt.com/pricing | 2026-05-06 |
-| Go | $4 | https://chatgpt.com/pricing | 2026-05-06 |
-| Plus | $20 | https://chatgpt.com/pricing | 2026-05-06 |
-| Pro | $200 | https://chatgpt.com/pricing | 2026-05-06 |
-| Business | $30 / user | https://chatgpt.com/pricing | 2026-05-06 |
+| Plan | Price | Source URL | Verified |
+| --- | --- | --- | --- |
+| Free | $XX.XX / month | https://chatgpt.com/pricing | YYYY-MM-DD |
+| Go | $XX.XX / month | https://chatgpt.com/pricing | YYYY-MM-DD |
+| Plus | $XX.XX / month | https://chatgpt.com/pricing | YYYY-MM-DD |
+| Pro | $XX.XX / month | https://chatgpt.com/pricing | YYYY-MM-DD |
+| Business | $XX.XX / user / month | https://chatgpt.com/pricing | YYYY-MM-DD |
 
-## Anthropic API Direct
+## Anthropic API
 
-| Model | Input | Output | Source | Verified |
-| --- | ---: | ---: | --- | --- |
-| Claude Haiku 4.5 | $1 / MTok | $5 / MTok | https://platform.claude.com/docs/en/docs/about-claude/pricing | 2026-05-06 |
-| Claude Sonnet 4.6 | $3 / MTok | $15 / MTok | https://platform.claude.com/docs/en/docs/about-claude/pricing | 2026-05-06 |
-| Claude Opus 4.7 | $5 / MTok | $25 / MTok | https://platform.claude.com/docs/en/docs/about-claude/pricing | 2026-05-06 |
+| Model | Price | Source URL | Verified |
+| --- | --- | --- | --- |
+| Claude Haiku 4.5 | $XX.XX / MTok in, $XX.XX / MTok out | https://platform.claude.com/docs/en/docs/about-claude/pricing | YYYY-MM-DD |
+| Claude Sonnet 4.6 | $XX.XX / MTok in, $XX.XX / MTok out | https://platform.claude.com/docs/en/docs/about-claude/pricing | YYYY-MM-DD |
+| Claude Opus 4.7 | $XX.XX / MTok in, $XX.XX / MTok out | https://platform.claude.com/docs/en/docs/about-claude/pricing | YYYY-MM-DD |
 
-## OpenAI API Direct
+## OpenAI API
 
-| Model | Input | Output | Source | Verified |
-| --- | ---: | ---: | --- | --- |
-| gpt-5.4-mini | $0.75 / MTok | $4.50 / MTok | https://developers.openai.com/api/docs/pricing | 2026-05-06 |
-| gpt-5.4 | $2.50 / MTok | $15 / MTok | https://developers.openai.com/api/docs/pricing | 2026-05-06 |
-| gpt-5.5 | $5 / MTok | $30 / MTok | https://developers.openai.com/api/docs/pricing | 2026-05-06 |
+| Model | Price | Source URL | Verified |
+| --- | --- | --- | --- |
+| gpt-5.4-mini | $XX.XX / MTok in, $XX.XX / MTok out | https://developers.openai.com/api/docs/pricing | YYYY-MM-DD |
+| gpt-5.4 | $XX.XX / MTok in, $XX.XX / MTok out | https://developers.openai.com/api/docs/pricing | YYYY-MM-DD |
+| gpt-5.5 | $XX.XX / MTok in, $XX.XX / MTok out | https://developers.openai.com/api/docs/pricing | YYYY-MM-DD |
 
 ## Gemini
 
-| Model | Input | Output | Source | Verified |
-| --- | ---: | ---: | --- | --- |
-| Gemini 2.5 Flash-Lite | $0.10 / MTok | $0.40 / MTok | https://ai.google.dev/gemini-api/docs/pricing | 2026-05-06 |
-| Gemini 2.5 Flash | $0.30 / MTok | $2.50 / MTok | https://ai.google.dev/gemini-api/docs/pricing | 2026-05-06 |
-| Gemini 2.5 Pro | $1.25 / MTok | $10 / MTok | https://ai.google.dev/gemini-api/docs/pricing | 2026-05-06 |
+| Model | Price | Source URL | Verified |
+| --- | --- | --- | --- |
+| Gemini 2.5 Flash-Lite | $XX.XX / MTok in, $XX.XX / MTok out | https://ai.google.dev/gemini-api/docs/pricing | YYYY-MM-DD |
+| Gemini 2.5 Flash | $XX.XX / MTok in, $XX.XX / MTok out | https://ai.google.dev/gemini-api/docs/pricing | YYYY-MM-DD |
+| Gemini 2.5 Pro | $XX.XX / MTok in, $XX.XX / MTok out | https://ai.google.dev/gemini-api/docs/pricing | YYYY-MM-DD |
 
 ## Windsurf
 
-| Plan | Price | Source | Verified |
-| --- | ---: | --- | --- |
-| Free | $0 | https://windsurf.com/pricing | 2026-05-06 |
-| Pro | $20 | https://windsurf.com/pricing | 2026-05-06 |
-| Max | $200 | https://windsurf.com/pricing | 2026-05-06 |
-| Teams | $40 / user | https://windsurf.com/pricing | 2026-05-06 |
+| Plan | Price | Source URL | Verified |
+| --- | --- | --- | --- |
+| Free | $XX.XX / month | https://windsurf.com/pricing | YYYY-MM-DD |
+| Pro | $XX.XX / month | https://windsurf.com/pricing | YYYY-MM-DD |
+| Max | $XX.XX / month | https://windsurf.com/pricing | YYYY-MM-DD |
+| Teams | $XX.XX / user / month | https://windsurf.com/pricing | YYYY-MM-DD |
