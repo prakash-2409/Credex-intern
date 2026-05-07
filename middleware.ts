@@ -2,8 +2,14 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const WINDOW_MS = 60_000;
 const LIMIT = 5;
+const PROTECTED_POST_ROUTES = new Set(["/api/audit", "/api/leads"]);
 
-const buckets = new Map<string, number[]>();
+interface Bucket {
+  attempts: number[];
+  resetAt: number;
+}
+
+const buckets = new Map<string, Bucket>();
 
 function getIp(request: NextRequest) {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -15,25 +21,37 @@ function getIp(request: NextRequest) {
 }
 
 export function middleware(request: NextRequest) {
-  if (!request.nextUrl.pathname.startsWith("/api/")) {
+  if (request.method !== "POST") {
+    return NextResponse.next();
+  }
+
+  if (!PROTECTED_POST_ROUTES.has(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
 
   const ip = getIp(request);
   const now = Date.now();
-  const bucket = buckets.get(ip) ?? [];
-  const recent = bucket.filter((timestamp) => now - timestamp < WINDOW_MS);
+  const bucket = buckets.get(ip);
 
-  if (recent.length >= LIMIT) {
-    return NextResponse.json({ error: "Rate limit exceeded." }, { status: 429 });
+  const attempts = (bucket?.attempts ?? []).filter((timestamp) => now - timestamp < WINDOW_MS);
+  const resetAt = attempts.length ? attempts[0] + WINDOW_MS : now + WINDOW_MS;
+
+  if (attempts.length >= LIMIT) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - now) / 1000));
+    console.info(`[rate-limit] blocked ip=${ip} route=${request.nextUrl.pathname} retryAfter=${retryAfterSeconds}s`);
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Please retry shortly." },
+      { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
+    );
   }
 
-  recent.push(now);
-  buckets.set(ip, recent);
+  attempts.push(now);
+  buckets.set(ip, { attempts, resetAt });
+  console.info(`[rate-limit] accepted ip=${ip} route=${request.nextUrl.pathname} count=${attempts.length}`);
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ["/api/audit", "/api/leads"],
 };

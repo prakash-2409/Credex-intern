@@ -27,10 +27,11 @@ const summaryRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  let fallback = "";
   try {
     const body = await request.json();
     const parsed = summaryRequestSchema.parse(body);
-    const fallback = buildSummaryFallback({
+    fallback = buildSummaryFallback({
       auditId: parsed.auditId,
       teamSize: parsed.teamSize,
       useCase: parsed.useCase,
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ summary: fallback, source: "fallback" });
+      return NextResponse.json({ summary: fallback, source: "fallback", reason: "missing_api_key" });
     }
 
     const client = new Anthropic({ apiKey });
@@ -64,12 +65,18 @@ export async function POST(request: NextRequest) {
       .trim();
 
     if (!summary) {
-      return NextResponse.json({ summary: fallback, source: "fallback" });
+      return NextResponse.json({ summary: fallback, source: "fallback", reason: "empty_ai_response" });
     }
 
     return NextResponse.json({ summary, source: "live" });
-  } catch (error) {
-    const status = error instanceof Error && /429|500|503/.test(error.message) ? 200 : 200;
-    return NextResponse.json({ summary: "", source: "fallback" }, { status, headers: { "x-summary-fallback": "true" } });
+  } catch {
+    return NextResponse.json(
+      {
+        summary: fallback || "AI summary is temporarily unavailable. Using deterministic fallback summary.",
+        source: "fallback",
+        reason: "request_failed",
+      },
+      { status: 200, headers: { "x-summary-fallback": "true" } },
+    );
   }
 }

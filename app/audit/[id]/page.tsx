@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { AuditResults } from "@/components/AuditResults";
 import { LeadCapture } from "@/components/LeadCapture";
+import { ReferralCodeDisplay } from "@/components/ReferralCodeDisplay";
 import { getAuditById } from "@/lib/auditStore";
 import { buildSummaryFallback } from "@/lib/summary";
 
@@ -26,12 +27,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: `Audit ${id} | Credex AI Spend Audit`,
       description: `Estimated monthly savings of $${audit.total_monthly_savings.toFixed(2)} for a ${audit.team_size}-person ${audit.use_case} team.`,
-      images: [`/audit/${id}/opengraph-image`],
+      images: [`/api/og?auditId=${id}`],
     },
     twitter: {
       card: "summary_large_image",
       title: `Audit ${id} | Credex AI Spend Audit`,
       description: `Estimated monthly savings of $${audit.total_monthly_savings.toFixed(2)} for a ${audit.team_size}-person ${audit.use_case} team.`,
+      images: [`/api/og?auditId=${id}`],
     },
   };
 }
@@ -74,6 +76,7 @@ export default async function AuditPage({ params }: PageProps) {
         summarySource={audit.summary ? "live" : "fallback"}
         publicUrl={`/audit/${audit.id}`}
       />
+      <ReferralCodeDisplay referralCode={audit.referral_code} />
       <div className="mt-6">
         <LeadCapture
           auditId={audit.id}

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
 import { runAudit } from "@/lib/auditEngine";
-import { saveAudit } from "@/lib/auditStore";
+import { saveAudit, recordReferral } from "@/lib/auditStore";
 import { buildSummaryFallback } from "@/lib/summary";
 import { toolOrder, useCaseOptions } from "@/lib/pricingData";
 
@@ -19,6 +19,7 @@ const auditRequestSchema = z.object({
       enabled: z.boolean().optional().default(true),
     }),
   ).min(1),
+  ref: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -26,6 +27,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const parsed = auditRequestSchema.parse(body);
     const auditId = nanoid(12);
+    const referralCode = nanoid(6);
+
     const outcome = runAudit({
       teamSize: parsed.teamSize,
       useCase: parsed.useCase,
@@ -39,14 +42,27 @@ export async function POST(request: NextRequest) {
       outcome,
     });
 
-    void saveAudit({
+    const persisted = await saveAudit({
       id: auditId,
       teamSize: parsed.teamSize,
       useCase: parsed.useCase,
       tools: parsed.tools,
       outcome,
       summary: summaryFallback,
+      referralCode,
     });
+
+    if (!persisted) {
+      console.error(`[audit] unable to persist audit ${auditId}`);
+    }
+
+    // Record referral if ref parameter is provided
+    if (parsed.ref && persisted) {
+      const referralRecorded = await recordReferral(parsed.ref, auditId);
+      if (!referralRecorded) {
+        console.warn(`[audit] unable to record referral from ${parsed.ref} to ${auditId}`);
+      }
+    }
 
     return NextResponse.json({
       auditId,
@@ -55,6 +71,8 @@ export async function POST(request: NextRequest) {
       useCase: parsed.useCase,
       outcome,
       summaryFallback,
+      persisted,
+      referralCode,
     });
   } catch (error) {
     const message = error instanceof z.ZodError ? error.issues[0]?.message ?? "Invalid audit payload." : "Unable to run audit.";

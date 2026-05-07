@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -27,12 +28,14 @@ export const metadata: Metadata = {
     description:
       "Compare AI tool subscriptions and API spend against hardcoded pricing rules.",
     type: "website",
+    images: ["/api/og?auditId=preview"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Credex AI Spend Audit",
     description:
       "Compare AI tool subscriptions and API spend against hardcoded pricing rules.",
+    images: ["/api/og?auditId=preview"],
   },
 };
 
@@ -46,7 +49,10 @@ export default function RootLayout({
       lang="en"
       className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

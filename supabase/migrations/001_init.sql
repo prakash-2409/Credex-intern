@@ -1,5 +1,8 @@
 create extension if not exists pgcrypto;
 
+-- Security note: public clients can read audits for shared URLs, but inserts are
+-- restricted to server-side service role usage. Leads are write-only from server routes.
+
 create table if not exists public.audits (
   id text primary key,
   team_size integer not null,
@@ -27,6 +30,7 @@ alter table public.leads enable row level security;
 drop policy if exists "public read audits" on public.audits;
 drop policy if exists "public insert audits" on public.audits;
 drop policy if exists "public insert leads" on public.leads;
+drop policy if exists "service role read leads" on public.leads;
 
 create policy "public read audits"
 on public.audits
@@ -37,11 +41,17 @@ using (true);
 create policy "public insert audits"
 on public.audits
 for insert
-to anon, authenticated
+to service_role
 with check (true);
 
 create policy "public insert leads"
 on public.leads
 for insert
-to anon, authenticated
+to service_role
 with check (true);
+
+create policy "service role read leads"
+on public.leads
+for select
+to service_role
+using (true);

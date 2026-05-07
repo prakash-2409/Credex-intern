@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
@@ -13,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { toolCatalog, toolOrder, type ToolKey, useCaseOptions, type UseCase, getDefaultPlanId, getPlanDefinition } from "@/lib/pricingData";
 import { formatCurrency } from "@/lib/utils";
+import { toast } from "@/components/ui/use-toast";
 
 const localStorageKey = "credex-audit-form";
 
@@ -82,6 +84,8 @@ export function AuditForm({ onSubmitted }: AuditFormProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const refParam = searchParams?.get("ref");
 
   const form = useForm<AuditFormValues>({
     resolver: zodResolver(auditFormSchema) as unknown as Resolver<AuditFormValues>,
@@ -148,6 +152,7 @@ export function AuditForm({ onSubmitted }: AuditFormProps) {
           teamSize: values.teamSize,
           useCase: values.useCase,
           tools: activeTools,
+          ref: refParam ?? undefined,
         }),
       });
 
@@ -158,7 +163,9 @@ export function AuditForm({ onSubmitted }: AuditFormProps) {
 
       onSubmitted(payload);
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Unable to run audit.");
+      const message = submissionError instanceof Error ? submissionError.message : "Unable to run audit.";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -183,7 +190,8 @@ export function AuditForm({ onSubmitted }: AuditFormProps) {
             <div className="grid gap-5 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="teamSize">Team size</Label>
-                <Input id="teamSize" type="number" min={1} {...register("teamSize")} />
+                <Input id="teamSize" type="number" min={1} aria-describedby="team-size-hint" {...register("teamSize")} />
+                <p id="team-size-hint" className="text-xs text-muted">Use total seats that actively use these tools each month.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="useCase">Primary use case</Label>
@@ -224,13 +232,15 @@ export function AuditForm({ onSubmitted }: AuditFormProps) {
                         <div>
                           <div className="flex items-center gap-3">
                             <input
+                              id={`tool-enabled-${toolIndex}`}
                               type="checkbox"
                               checked={toolEntry.enabled}
                               onChange={(event) => setValue(`tools.${toolIndex}.enabled`, event.target.checked, { shouldDirty: true })}
                               className="h-5 w-5 rounded border-border text-accent focus:ring-accent"
+                              aria-label={`Enable ${definition.label}`}
                             />
                             <div>
-                              <p className="font-semibold text-foreground">{definition.label}</p>
+                              <label htmlFor={`tool-enabled-${toolIndex}`} className="font-semibold text-foreground cursor-pointer">{definition.label}</label>
                               <p className="text-sm text-muted">{definition.description}</p>
                             </div>
                           </div>

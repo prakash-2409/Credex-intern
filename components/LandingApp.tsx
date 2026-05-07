@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
 
 import { AuditForm, type AuditResponse } from "@/components/AuditForm";
@@ -8,11 +9,15 @@ import { AuditResults } from "@/components/AuditResults";
 import { LeadCapture } from "@/components/LeadCapture";
 import { Card, CardContent } from "@/components/ui/card";
 import { buildSummaryFallback } from "@/lib/summary";
+import { toast } from "@/components/ui/use-toast";
 
 export function LandingApp() {
   const [auditResponse, setAuditResponse] = useState<AuditResponse | null>(null);
   const [summary, setSummary] = useState<string>("");
   const [summarySource, setSummarySource] = useState<"loading" | "live" | "fallback">("loading");
+  const [summaryRetryToken, setSummaryRetryToken] = useState(0);
+  const searchParams = useSearchParams();
+  const refParam = searchParams?.get("ref");
 
   useEffect(() => {
     async function hydrateSummary() {
@@ -52,11 +57,23 @@ export function LandingApp() {
           }),
         );
         setSummarySource("fallback");
+        toast.warning("AI summary unavailable. Showing deterministic fallback.");
       }
     }
 
     void hydrateSummary();
-  }, [auditResponse]);
+  }, [auditResponse, summaryRetryToken]);
+
+  function retrySummary() {
+    setSummaryRetryToken((value) => value + 1);
+  }
+
+  // Show referral perk notification when audit completes with ref parameter
+  useEffect(() => {
+    if (auditResponse && refParam) {
+      toast.success("Perk unlocked! Both you and your friend get early Credex credits!");
+    }
+  }, [auditResponse, refParam]);
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
@@ -116,6 +133,7 @@ export function LandingApp() {
             summary={summary}
             summarySource={summarySource}
             publicUrl={auditResponse.publicUrl}
+            onRetrySummary={retrySummary}
           />
           <LeadCapture
             auditId={auditResponse.auditId}

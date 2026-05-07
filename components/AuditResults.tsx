@@ -9,6 +9,9 @@ import type { AuditOutcome } from "@/lib/auditEngine";
 import { formatCurrency } from "@/lib/utils";
 import { ShareButton } from "@/components/ShareButton";
 import { SummaryFallback } from "@/components/SummaryFallback";
+import { DownloadPDF } from "@/components/DownloadPDF";
+import { BenchmarkDisplay } from "@/components/BenchmarkDisplay";
+import { calculateBenchmark } from "@/lib/benchmark";
 
 interface AuditResultsProps {
   auditId: string;
@@ -18,13 +21,17 @@ interface AuditResultsProps {
   summary: string;
   summarySource: "loading" | "live" | "fallback";
   publicUrl: string;
+  onRetrySummary?: () => void;
 }
 
-export function AuditResults({ auditId, teamSize, useCase, outcome, summary, summarySource, publicUrl }: AuditResultsProps) {
+export function AuditResults({ auditId, teamSize, useCase, outcome, summary, summarySource, publicUrl, onRetrySummary }: AuditResultsProps) {
   const isWellSpent = outcome.totalMonthlySavings < 100;
+  const benchmark = calculateBenchmark(teamSize, outcome);
+  const consultationLink = process.env.NEXT_PUBLIC_CONSULTATION_LINK || "mailto:hello@credex.rocks?subject=Audit%20Consultation";
+  const showConsultationCTA = outcome.totalMonthlySavings > 500;
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6" id="audit-report-content">
       <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(15,118,110,0.16),transparent_35%)]" />
@@ -49,10 +56,19 @@ export function AuditResults({ auditId, teamSize, useCase, outcome, summary, sum
             </div>
             <div className="flex flex-wrap gap-3 sm:col-span-2">
               <ShareButton url={publicUrl} />
+              <DownloadPDF targetId="audit-report-content" fileName={`credex-audit-${auditId}`} />
               {outcome.highlightCredex ? (
                 <Button asChild variant="accent">
                   <a href="https://credex.com" target="_blank" rel="noreferrer">
                     Talk to Credex
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              ) : null}
+              {showConsultationCTA ? (
+                <Button asChild variant="secondary">
+                  <a href={consultationLink} target="_blank" rel="noreferrer">
+                    Book consultation
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </Button>
@@ -73,7 +89,17 @@ export function AuditResults({ auditId, teamSize, useCase, outcome, summary, sum
                 Generating a concise executive summary...
               </div>
             ) : summarySource === "fallback" ? (
-              <SummaryFallback auditId={auditId} teamSize={teamSize} useCase={useCase} outcome={outcome} />
+              <>
+                <SummaryFallback auditId={auditId} teamSize={teamSize} useCase={useCase} outcome={outcome} />
+                <div className="rounded-2xl border border-border bg-surface-strong p-3 text-xs leading-6 text-muted">
+                  AI summary could not be loaded. Showing deterministic fallback copy instead.
+                </div>
+                {onRetrySummary ? (
+                  <Button type="button" variant="secondary" size="sm" onClick={onRetrySummary}>
+                    Retry AI summary
+                  </Button>
+                ) : null}
+              </>
             ) : (
               <p className="text-sm leading-7 text-foreground">{summary}</p>
             )}
@@ -88,6 +114,28 @@ export function AuditResults({ auditId, teamSize, useCase, outcome, summary, sum
           </CardContent>
         </Card>
       </div>
+
+      <BenchmarkDisplay benchmark={benchmark} />
+
+      {showConsultationCTA ? (
+        <Card className="border-accent/50 bg-accent/5">
+          <CardHeader>
+            <CardTitle>Capture these savings</CardTitle>
+            <CardDescription>Credex&apos;s AI credit marketplace can help you redeploy this budget</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-6 text-foreground mb-4">
+              Your audit shows you could save <strong>{formatCurrency(outcome.totalMonthlySavings)}/month</strong>. A Credex specialist can help you negotiate contracts or restructure tool usage to capture these savings.
+            </p>
+            <Button asChild variant="accent">
+              <a href={consultationLink} target="_blank" rel="noreferrer">
+                Schedule a free 15-min consultation
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

@@ -1,10 +1,14 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-let cachedClient: SupabaseClient | null = null;
+let cachedReadClient: SupabaseClient | null = null;
+let cachedAdminClient: SupabaseClient | null = null;
 
-export function getSupabaseClient() {
-  if (cachedClient) {
-    return cachedClient;
+/**
+ * Returns a Supabase client configured for public read operations.
+ */
+export function getSupabaseReadClient() {
+  if (cachedReadClient) {
+    return cachedReadClient;
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -14,7 +18,7 @@ export function getSupabaseClient() {
     return null;
   }
 
-  cachedClient = createClient(url, anonKey, {
+  cachedReadClient = createClient(url, anonKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -22,5 +26,31 @@ export function getSupabaseClient() {
     },
   });
 
-  return cachedClient;
+  return cachedReadClient;
+}
+
+/**
+ * Returns a Supabase client with service role privileges for server-only writes.
+ */
+export function getSupabaseAdminClient() {
+  if (cachedAdminClient) {
+    return cachedAdminClient;
+  }
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceRoleKey) {
+    return null;
+  }
+
+  cachedAdminClient = createClient(url, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
+
+  return cachedAdminClient;
 }
