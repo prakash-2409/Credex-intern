@@ -26,26 +26,86 @@ export function DownloadPDF({ targetId, fileName }: DownloadPDFProps) {
     try {
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas"), import("jspdf")]);
 
-      const canvas = await html2canvas(target, {
-        backgroundColor: "#fffaf4",
-        scale: window.devicePixelRatio > 1 ? 2 : 1.5,
-        useCORS: true,
-      });
+      // Clone the target to avoid modifying the original DOM
+      const clonedTarget = target.cloneNode(true) as HTMLElement;
+      clonedTarget.style.width = target.scrollWidth + "px";
+      clonedTarget.style.backgroundColor = "#fffaf4";
+      document.body.appendChild(clonedTarget);
 
-      const imageData = canvas.toDataURL("image/png");
+      const canvas = await Promise.race([
+        html2canvas(clonedTarget, {
+          backgroundColor: "#fffaf4",
+          scale: window.devicePixelRatio > 1 ? 1.5 : 1,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          windowHeight: clonedTarget.scrollHeight,
+          windowWidth: clonedTarget.scrollWidth,
+        }),
+        new Promise<HTMLCanvasElement>((_, reject) =>
+          setTimeout(() => reject(new Error("Canvas rendering timeout")), 10000)
+        ),
+      ]);
+
+      // Clean up the cloned element
+      document.body.removeChild(clonedTarget);
+
+      const imageData = canvas.toDataURL("image/png", 0.95);
       const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
 
       const imageWidth = pageWidth - 48;
-      const imageHeight = (canvas.height * imageWidth) / canvas.width;
-      const renderedHeight = Math.min(imageHeight, pageHeight - 48);
+      const maxImageHeight = pageHeight - 48;
 
-      pdf.addImage(imageData, "PNG", 24, 24, imageWidth, renderedHeight, undefined, "FAST");
+      // Handle content that spans multiple pages
+      const imageHeight = (canvas.height * imageWidth) / canvas.width;
+
+      if (imageHeight <= maxImageHeight) {
+        // Content fits on one page
+        pdf.addImage(imageData, "PNG", 24, 24, imageWidth, imageHeight, undefined, "FAST");
+      } else {
+        // Content spans multiple pages - create chunks
+        const canvas2D = canvas.getContext("2d");
+        if (!canvas2D) throw new Error("Could not get canvas context");
+
+        const pageCanvasHeight = (maxImageHeight * canvas.width) / imageWidth;
+        let currentY = 0;
+
+        while (currentY < canvas.height) {
+          const chunkCanvas = document.createElement("canvas");
+          chunkCanvas.width = canvas.width;
+          chunkCanvas.height = Math.min(pageCanvasHeight, canvas.height - currentY);
+
+          const chunkCtx = chunkCanvas.getContext("2d");
+          if (!chunkCtx) throw new Error("Could not get chunk canvas context");
+
+          chunkCtx.drawImage(canvas, 0, currentY, canvas.width, chunkCanvas.height, 0, 0, canvas.width, chunkCanvas.height);
+
+          const chunkImageData = chunkCanvas.toDataURL("image/png", 0.95);
+          const chunkHeight = (chunkCanvas.height * imageWidth) / chunkCanvas.width;
+
+          pdf.addImage(chunkImageData, "PNG", 24, 24, imageWidth, chunkHeight, undefined, "FAST");
+
+          currentY += pageCanvasHeight;
+          if (currentY < canvas.height) {
+            pdf.addPage();
+          }
+        }
+      }
+
       pdf.save(`${fileName}.pdf`);
       toast.success("Report exported as PDF.");
-    } catch {
-      toast.error("Unable to export the PDF right now. Please try again.");
+    } catch (error) {
+      console.error("PDF export error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      if (errorMessage.includes("timeout")) {
+        toast.error("PDF generation took too long. Try again in a moment.");
+      } else if (errorMessage.includes("CORS")) {
+        toast.error("Could not load all content. Check your connection and try again.");
+      } else {
+        toast.error("Unable to export PDF. Please try again or check your browser permissions.");
+      }
     } finally {
       setIsExporting(false);
     }

@@ -2,6 +2,19 @@
 
 ## Data Flow
 
+*[If your current diagram is incomplete, replace with a real Mermaid or ASCII architecture diagram before submission.]*
+
+### Submission Diagram Placeholder
+
+```mermaid
+flowchart LR
+  U[User] --> F[Form]
+  F --> A[/api/audit]
+  A --> E[Audit Engine]
+  E --> R[Results]
+  R --> S[Share Page]
+```
+
 ```mermaid
 flowchart LR
   A[Landing form] --> B[/api/audit/]
@@ -27,3 +40,10 @@ Next.js App Router keeps the landing page, API routes, and public share page in 
 ## What Changes At 10k Audits Per Day
 
 At that volume, the in-memory middleware limiter would move to a shared store such as Upstash Redis or Supabase Edge Functions rate checks. Audit writes would batch through a queue or background worker so lead submission latency stays low. Summaries would be cached by audit id to avoid repeated Anthropic calls. Public result pages would read from the database directly and the OG image route would use a cached render or a pre-generated asset.
+
+*[Expand this section with specific choices and rough thresholds before submission.]*
+
+- **Queue strategy:** *[What queue or worker system would you use first, what jobs go into it, and what SLO are you targeting?]*
+- **Caching strategy:** *[What do you cache (summary, OG image, pricing lookup), where, and for how long?]*
+- **Database pooling:** *[How do you avoid connection exhaustion at peak load (pooler, batching, retries, backoff)?]*
+- **Bottleneck test plan:** *[Which endpoint fails first at load and how will you measure it?]*

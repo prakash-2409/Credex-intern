@@ -4,7 +4,21 @@
 
 This project is a public AI spend audit for the Credex internship assignment. It lets a visitor enter the AI tools their team uses, compares the current spend against hardcoded pricing rules, and generates a shareable result page with a lead capture flow.
 
+*[If this section is still generic, replace with a 2-3 sentence final summary of what you built, for whom, and what concrete outcome it delivers.]*
+
 ## Screenshots
+
+*[Add at least 3 real screenshots with captions and alt text. Suggested: landing form, completed audit result, share page or lead capture moment.]*
+
+- ![Screenshot 1: ...](./public/[replace-with-real-screenshot-1].png)
+- ![Screenshot 2: ...](./public/[replace-with-real-screenshot-2].png)
+- ![Screenshot 3: ...](./public/[replace-with-real-screenshot-3].png)
+
+## Loom Walkthrough
+
+*[Add a real Loom walkthrough URL (2-5 min) that shows the end-to-end flow and explains key product decisions.]*
+
+Loom: [Add Loom link here](https://loom.com/[replace-with-real-video-id])
 
 ## Quick Start
 
@@ -13,6 +27,8 @@ This project is a public AI spend audit for the Credex internship assignment. It
 3. Run `npm run dev`.
 4. Open the landing page, submit an audit, and review the shareable result URL.
 
+*[Verify these commands still work in a fresh clone and update any outdated steps before submission.]*
+
 ## Decisions
 
 1. The audit engine is pure and deterministic so pricing decisions are reproducible.
@@ -20,8 +36,21 @@ This project is a public AI spend audit for the Credex internship assignment. It
 3. Supabase stores audits and leads because the assignment requires a shareable result and a lead table.
 4. The lead gate uses a honeypot and middleware rate limiting instead of heavier auth.
 5. The public result page keeps personal data out of the URL and OG metadata.
+6. Template scaffolds in project markdown files were AI-assisted, but final submission content is human-written and based on real work.
+
+*[Below, list exactly 5 real trade-offs in this format. Keep each to 2-4 lines with one concrete reason.]*
+
+- **Decision:** [Used X instead of Y]; **Trade-off:** [What you gained and what you gave up]; **Why:** [Why this was the right call for this project]
+- **Decision:** [ ... ]; **Trade-off:** [ ... ]; **Why:** [ ... ]
+- **Decision:** [ ... ]; **Trade-off:** [ ... ]; **Why:** [ ... ]
+- **Decision:** [ ... ]; **Trade-off:** [ ... ]; **Why:** [ ... ]
+- **Decision:** [ ... ]; **Trade-off:** [ ... ]; **Why:** [ ... ]
 
 ## Deployed URL
+
+*[Add the real deployed URL and verify the full audit flow works before submission.]*
+
+Live: [Add deployed URL here](https://[replace-with-real-domain])
 
 ## Notes
 
