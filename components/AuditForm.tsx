@@ -172,7 +172,7 @@ export function AuditForm({ onSubmitted }: AuditFormProps) {
   });
 
   return (
-    <Card className="relative overflow-hidden">
+    <Card id="audit-form" className="relative overflow-hidden">
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -306,6 +306,12 @@ export function AuditForm({ onSubmitted }: AuditFormProps) {
                   {isSubmitting ? "Running audit..." : "Run audit"}
                 </Button>
               </div>
+              {isSubmitting ? (
+                <div className="rounded-2xl border border-border bg-surface-strong p-3">
+                  <div className="h-2 w-2/3 rounded-full bg-gradient-to-r from-accent/10 via-accent/50 to-accent/10 animate-shimmer" />
+                  <p className="mt-2 text-xs text-muted">Checking plans, seat counts, and alternative options.</p>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </form>

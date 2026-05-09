@@ -64,15 +64,15 @@ export function LeadCapture({ auditId, highlightCredex, totalMonthlySavings, ope
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isLowSaver ? "Get optimization alerts" : highlightCredex ? "Get the full report" : "Send me the full report"}</DialogTitle>
+          <DialogTitle>{isLowSaver ? "Get optimization alerts" : highlightCredex ? "Get your detailed savings report" : "Get your detailed savings report"}</DialogTitle>
           <DialogDescription>
             {isLowSaver
-              ? "Your stack is already efficient. Leave your email and we will notify you only when new savings opportunities appear."
+              ? "Your stack is already efficient. Leave your work email and we will only notify you when a meaningful new savings opportunity appears."
               : highlightCredex
-              ? `You are sitting on roughly $${totalMonthlySavings.toFixed(2)} in monthly savings. Credex may want to reach out.`
-              : "We will email a copy of the audit and let you know if the economics change later."}
+              ? `You are sitting on roughly $${totalMonthlySavings.toFixed(2)} in monthly savings. Enter your work email to get the report and a free credit evaluation.`
+              : "Enter your work email to get the report and a free credit evaluation. If Credex looks like a fit, we’ll follow up once with a human."}
           </DialogDescription>
         </DialogHeader>
 
@@ -93,6 +93,7 @@ export function LeadCapture({ auditId, highlightCredex, totalMonthlySavings, ope
                 autoFocus
                 aria-describedby={error ? "lead-error" : undefined}
                 placeholder="you@company.com"
+                className="transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent"
               />
             </div>
             {!isLowSaver ? (
@@ -107,9 +108,12 @@ export function LeadCapture({ auditId, highlightCredex, totalMonthlySavings, ope
                 </div>
               </>
             ) : null}
+            <p className="text-xs leading-5 text-muted">
+              We&apos;ll never spam you. You&apos;ll get one email with the audit and, if it makes sense, a human follow-up about Credex credits.
+            </p>
             {error ? <p id="lead-error" className="text-sm text-red-700" role="alert">{error}</p> : null}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : isLowSaver ? "Notify me" : "Send report"}
+              {isSubmitting ? "Saving..." : isLowSaver ? "Notify me" : "Get my report"}
             </Button>
           </form>
         )}

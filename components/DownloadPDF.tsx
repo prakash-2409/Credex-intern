@@ -5,107 +5,94 @@ import { Download, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { formatCurrency, formatPercent } from "@/lib/utils";
+import type { AuditOutcome } from "@/lib/auditEngine";
 
 interface DownloadPDFProps {
-  targetId: string;
+  auditId: string;
+  teamSize: number;
+  useCase: string;
+  outcome: AuditOutcome;
+  summary: string;
+  publicUrl: string;
   fileName: string;
 }
 
-export function DownloadPDF({ targetId, fileName }: DownloadPDFProps) {
+export function DownloadPDF({ auditId, teamSize, useCase, outcome, summary, publicUrl, fileName }: DownloadPDFProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   async function handleExport() {
-    const target = document.getElementById(targetId);
-    if (!target) {
-      toast.error("Could not find the report content to export.");
-      return;
-    }
-
     setIsExporting(true);
 
     try {
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas"), import("jspdf")]);
+      const { jsPDF } = await import("jspdf");
 
-      // Clone the target to avoid modifying the original DOM
-      const clonedTarget = target.cloneNode(true) as HTMLElement;
-      clonedTarget.style.width = target.scrollWidth + "px";
-      clonedTarget.style.backgroundColor = "#fffaf4";
-      document.body.appendChild(clonedTarget);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
 
-      const canvas = await Promise.race([
-        html2canvas(clonedTarget, {
-          backgroundColor: "#fffaf4",
-          scale: window.devicePixelRatio > 1 ? 1.5 : 1,
-          useCORS: true,
-          allowTaint: true,
-          logging: false,
-          windowHeight: clonedTarget.scrollHeight,
-          windowWidth: clonedTarget.scrollWidth,
-        }),
-        new Promise<HTMLCanvasElement>((_, reject) =>
-          setTimeout(() => reject(new Error("Canvas rendering timeout")), 10000)
-        ),
-      ]);
-
-      // Clean up the cloned element
-      document.body.removeChild(clonedTarget);
-
-      const imageData = canvas.toDataURL("image/png", 0.95);
-      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const margin = 40;
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
+      const contentWidth = pageWidth - margin * 2;
+      const lineHeight = 16;
 
-      const imageWidth = pageWidth - 48;
-      const maxImageHeight = pageHeight - 48;
-
-      // Handle content that spans multiple pages
-      const imageHeight = (canvas.height * imageWidth) / canvas.width;
-
-      if (imageHeight <= maxImageHeight) {
-        // Content fits on one page
-        pdf.addImage(imageData, "PNG", 24, 24, imageWidth, imageHeight, undefined, "FAST");
-      } else {
-        // Content spans multiple pages - create chunks
-        const canvas2D = canvas.getContext("2d");
-        if (!canvas2D) throw new Error("Could not get canvas context");
-
-        const pageCanvasHeight = (maxImageHeight * canvas.width) / imageWidth;
-        let currentY = 0;
-
-        while (currentY < canvas.height) {
-          const chunkCanvas = document.createElement("canvas");
-          chunkCanvas.width = canvas.width;
-          chunkCanvas.height = Math.min(pageCanvasHeight, canvas.height - currentY);
-
-          const chunkCtx = chunkCanvas.getContext("2d");
-          if (!chunkCtx) throw new Error("Could not get chunk canvas context");
-
-          chunkCtx.drawImage(canvas, 0, currentY, canvas.width, chunkCanvas.height, 0, 0, canvas.width, chunkCanvas.height);
-
-          const chunkImageData = chunkCanvas.toDataURL("image/png", 0.95);
-          const chunkHeight = (chunkCanvas.height * imageWidth) / chunkCanvas.width;
-
-          pdf.addImage(chunkImageData, "PNG", 24, 24, imageWidth, chunkHeight, undefined, "FAST");
-
-          currentY += pageCanvasHeight;
-          if (currentY < canvas.height) {
+      const addText = (text: string, x: number, y: number, options: { size?: number; color?: string; bold?: boolean; maxWidth?: number } = {}) => {
+        const { size = 11, color = "#0f172a", bold = false, maxWidth = contentWidth } = options;
+        pdf.setFont("helvetica", bold ? "bold" : "normal");
+        pdf.setFontSize(size);
+        pdf.setTextColor(color);
+        const lines = pdf.splitTextToSize(text, maxWidth) as string[];
+        let nextY = y;
+        for (const line of lines) {
+          if (nextY > pageHeight - margin) {
             pdf.addPage();
+            nextY = margin;
           }
+          pdf.text(line, x, nextY);
+          nextY += lineHeight;
         }
-      }
+        return nextY;
+      };
+
+      let cursorY = margin;
+      cursorY = addText("Credex AI Spend Audit", margin, cursorY, { size: 20, bold: true });
+      cursorY = addText(`Audit ${auditId}`, margin, cursorY + 4, { size: 11, color: "#475569" });
+      cursorY = addText(`Team size: ${teamSize}  |  Use case: ${useCase}`, margin, cursorY + 2, { size: 11, color: "#475569" });
+      cursorY = addText(`Public URL: ${publicUrl}`, margin, cursorY + 2, { size: 10, color: "#2563eb" });
+
+      cursorY += 10;
+      cursorY = addText(`Monthly savings: ${formatCurrency(outcome.totalMonthlySavings)}`, margin, cursorY, { size: 18, bold: true, color: "#1d4ed8" });
+      cursorY = addText(`Annual savings: ${formatCurrency(outcome.totalAnnualSavings)}`, margin, cursorY + 2, { size: 13, bold: true });
+
+      const currentSpend = outcome.results.reduce((sum, item) => sum + item.currentSpend, 0);
+      const savingsRate = currentSpend > 0 ? Math.min(100, (outcome.totalMonthlySavings / currentSpend) * 100) : 0;
+      cursorY = addText(`Savings rate: ${formatPercent(savingsRate)}`, margin, cursorY + 4, { size: 11, color: "#475569" });
+      cursorY = addText("Summary", margin, cursorY + 12, { size: 15, bold: true });
+      cursorY = addText(summary, margin, cursorY + 4, { size: 11, maxWidth: contentWidth });
+
+      cursorY = addText("Per-tool breakdown", margin, cursorY + 12, { size: 15, bold: true });
+
+      outcome.results.forEach((item) => {
+        cursorY = addText(item.tool, margin, cursorY + 8, { size: 12, bold: true });
+        cursorY = addText(`Current spend: ${formatCurrency(item.currentSpend)}`, margin, cursorY, { size: 10, color: "#475569" });
+        cursorY = addText(`Recommendation: ${item.recommendation}`, margin, cursorY, { size: 10, bold: true });
+        cursorY = addText(`Reasoning: ${item.reasoning}`, margin, cursorY, { size: 10, maxWidth: contentWidth });
+        cursorY = addText(`Savings: ${formatCurrency(item.savings)}`, margin, cursorY, { size: 10, color: item.savings > 0 ? "#047857" : "#64748b" });
+
+        if (cursorY > pageHeight - margin - 60) {
+          pdf.addPage();
+          cursorY = margin;
+        }
+      });
 
       pdf.save(`${fileName}.pdf`);
-      toast.success("Report exported as PDF.");
+      toast.success("PDF exported successfully!");
     } catch (error) {
       console.error("PDF export error:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      if (errorMessage.includes("timeout")) {
-        toast.error("PDF generation took too long. Try again in a moment.");
-      } else if (errorMessage.includes("CORS")) {
-        toast.error("Could not load all content. Check your connection and try again.");
-      } else {
-        toast.error("Unable to export PDF. Please try again or check your browser permissions.");
-      }
+      toast.error("PDF export failed. Please try again.");
     } finally {
       setIsExporting(false);
     }

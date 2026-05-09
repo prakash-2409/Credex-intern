@@ -48,15 +48,15 @@ function money(value: number) {
   return value.toFixed(2);
 }
 
-function buildKeepRecommendation(toolLabel: string, currentSpend: number, useCase: UseCase) {
+function buildKeepRecommendation(toolLabel: string, currentSpend: number, teamSize: number, useCase: UseCase) {
   return {
     recommendation: "Keep current setup",
     savings: 0,
-    reasoning: `${toolLabel} looks appropriate for a ${useCase} workflow at $${money(currentSpend)} per month, and no cheaper plan or alternative clears the savings threshold.`,
+    reasoning: `For a ${teamSize}-person ${useCase} team, ${toolLabel} looks sensible at $${money(currentSpend)} per month. I did not find a cheaper plan or a meaningful alternative that would save enough to justify a change right now.`,
   } satisfies CandidateRecommendation;
 }
 
-function pickBestSameVendorOption(input: SelectedToolInput): CandidateRecommendation | null {
+function pickBestSameVendorOption(input: SelectedToolInput, teamSize: number, useCase: UseCase): CandidateRecommendation | null {
   const currentTool = getToolDefinition(input.tool);
   const sameVendorPlans = listAllPlansForVendor(currentTool.vendor)
     .filter(({ tool, plan }) => !(tool.key === input.tool && plan.id === input.plan))
@@ -78,11 +78,11 @@ function pickBestSameVendorOption(input: SelectedToolInput): CandidateRecommenda
   return {
     recommendation: `Switch to ${winner.tool.label} ${winner.plan.label}`,
     savings: input.monthlySpend - winner.candidateCost,
-    reasoning: `${currentTool.label} is on ${input.plan} for ${input.seats} seat(s). ${winner.tool.label} ${winner.plan.label} is a cheaper same-vendor option at $${money(winner.candidateCost)} per month for the same seat count.`,
+    reasoning: `${currentTool.label} is on ${input.plan} for ${input.seats} seat(s), which is a bit heavier than a ${teamSize}-person ${useCase} team usually needs. ${winner.tool.label} ${winner.plan.label} keeps the same vendor workflow but brings the bill down to $${money(winner.candidateCost)} per month, saving you $${money(input.monthlySpend - winner.candidateCost)}.`,
   };
 }
 
-function pickBestAlternativeTool(input: SelectedToolInput, useCase: UseCase) {
+function pickBestAlternativeTool(input: SelectedToolInput, teamSize: number, useCase: UseCase) {
   const candidates = listSubscriptionPlansForUseCase(useCase)
     .map(({ tool, plan }) => {
       const candidateCost = getSubscriptionPlanTotal(plan, input.seats);
@@ -107,7 +107,7 @@ function pickBestAlternativeTool(input: SelectedToolInput, useCase: UseCase) {
   return {
     recommendation: `Move to ${winner.tool.label} ${winner.plan.label}`,
     savings,
-    reasoning: `${winner.tool.label} ${winner.plan.label} is the lowest-cost matched option for a ${useCase} team at $${money(winner.candidateCost)} per month.`,
+    reasoning: `For a ${teamSize}-person ${useCase} team, ${winner.tool.label} ${winner.plan.label} is the lowest-cost option that still matches the workflow well. It lands at $${money(winner.candidateCost)} per month, which saves $${money(savings)} versus the current setup.`,
   } satisfies CandidateRecommendation;
 }
 
@@ -118,7 +118,7 @@ function pickBestAlternativeTool(input: SelectedToolInput, useCase: UseCase) {
  * or a team tier being used when the lighter individual tier is cheaper for the same
  * number of seats.
  */
-function evaluatePlanFit(input: SelectedToolInput) {
+function evaluatePlanFit(input: SelectedToolInput, teamSize: number, useCase: UseCase) {
   const plan = getPlanDefinition(input.tool, input.plan);
   if (plan.billingKind === "usage") {
     return null;
@@ -132,7 +132,7 @@ function evaluatePlanFit(input: SelectedToolInput) {
   return {
     recommendation: `Keep ${plan.label} but trim usage`,
     savings: 0,
-    reasoning: `${plan.label} is priced below the entered monthly spend, so the issue appears to be usage volume rather than plan selection.`,
+    reasoning: `For a ${teamSize}-person ${useCase} team, ${plan.label} is already priced below the entered spend. The main issue looks like usage volume rather than the plan itself, so I would tighten the way the tool is being used before making a bigger switch.`,
   } satisfies CandidateRecommendation;
 }
 
@@ -142,8 +142,8 @@ function evaluatePlanFit(input: SelectedToolInput) {
  * For team plans this often lands on an individual-tier license repeated across seats.
  * For API products this can surface a packaged subscription instead of raw usage billing.
  */
-function evaluateSameVendor(input: SelectedToolInput) {
-  const candidate = pickBestSameVendorOption(input);
+function evaluateSameVendor(input: SelectedToolInput, teamSize: number, useCase: UseCase) {
+  const candidate = pickBestSameVendorOption(input, teamSize, useCase);
   return candidate && candidate.savings >= MIN_SUBSTANTIAL_SAVINGS ? candidate : null;
 }
 
@@ -153,8 +153,8 @@ function evaluateSameVendor(input: SelectedToolInput) {
  * This is intentionally conservative. We only recommend an alternative when the savings are
  * meaningful enough to justify workflow change and migration cost.
  */
-function evaluateAlternativeTool(input: SelectedToolInput, useCase: UseCase) {
-  return pickBestAlternativeTool(input, useCase);
+function evaluateAlternativeTool(input: SelectedToolInput, teamSize: number, useCase: UseCase) {
+  return pickBestAlternativeTool(input, teamSize, useCase);
 }
 
 /**
@@ -164,26 +164,26 @@ function evaluateAlternativeTool(input: SelectedToolInput, useCase: UseCase) {
  * The point is not to estimate token volume. The rule is to detect when raw usage billing is
  * meaningfully more expensive than a packaged plan for the same workflow and seat count.
  */
-function evaluateRetailVsBundle(input: SelectedToolInput, useCase: UseCase) {
+function evaluateRetailVsBundle(input: SelectedToolInput, teamSize: number, useCase: UseCase) {
   const currentTool = getToolDefinition(input.tool);
   if (currentTool.vendor !== "Anthropic" && currentTool.vendor !== "OpenAI" && input.tool !== "gemini") {
     return null;
   }
 
-  return evaluateAlternativeTool(input, useCase);
+  return evaluateAlternativeTool(input, teamSize, useCase);
 }
 
-function evaluateTool(input: SelectedToolInput, useCase: UseCase): AuditLineItem {
+function evaluateTool(input: SelectedToolInput, teamSize: number, useCase: UseCase): AuditLineItem {
   const definition = getToolDefinition(input.tool);
-  const planFit = evaluatePlanFit(input);
-  const sameVendor = evaluateSameVendor(input);
-  const alternative = evaluateAlternativeTool(input, useCase);
-  const retailVsBundle = evaluateRetailVsBundle(input, useCase);
+  const planFit = evaluatePlanFit(input, teamSize, useCase);
+  const sameVendor = evaluateSameVendor(input, teamSize, useCase);
+  const alternative = evaluateAlternativeTool(input, teamSize, useCase);
+  const retailVsBundle = evaluateRetailVsBundle(input, teamSize, useCase);
 
   const winner = sameVendor ?? alternative ?? retailVsBundle ?? planFit;
 
   if (!winner || winner.savings <= 0) {
-    const keep = buildKeepRecommendation(definition.label, input.monthlySpend, useCase);
+    const keep = buildKeepRecommendation(definition.label, input.monthlySpend, teamSize, useCase);
     return {
       tool: definition.label,
       currentSpend: input.monthlySpend,
@@ -212,7 +212,7 @@ function evaluateTool(input: SelectedToolInput, useCase: UseCase): AuditLineItem
 export function runAudit(input: AuditInput): AuditOutcome {
   const results = input.tools
     .filter((tool) => tool.monthlySpend > 0 || tool.seats > 0)
-    .map((tool) => evaluateTool(tool, input.useCase));
+    .map((tool) => evaluateTool(tool, input.teamSize, input.useCase));
 
   const totalMonthlySavings = Number(results.reduce((sum, item) => sum + item.savings, 0).toFixed(2));
 

@@ -15,12 +15,39 @@ export function ShareButton({ url }: ShareButtonProps) {
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      toast.success("Share link copied to clipboard.");
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      toast.error("Unable to copy link. Please copy it manually.");
+      // Build full shareable URL
+      const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+      const fullUrl = `${baseUrl}${url}`;
+      
+      // Try clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(fullUrl);
+        setCopied(true);
+        toast.success("Share link copied to clipboard.");
+        window.setTimeout(() => setCopied(false), 1800);
+      } else {
+        // Fallback for older browsers: use textarea trick
+        const textArea = document.createElement("textarea");
+        textArea.value = fullUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const success = document.execCommand("copy");
+        document.body.removeChild(textArea);
+        
+        if (!success) {
+          throw new Error("Copy command failed");
+        }
+        setCopied(true);
+        toast.success("Share link copied to clipboard.");
+        window.setTimeout(() => setCopied(false), 1800);
+      }
+    } catch (error) {
+      console.error("Copy error:", error);
+      toast.error("Unable to copy link. Please try again.");
     }
   }
 
