@@ -1,3 +1,4 @@
+<!-- ⚠️ WARNING: This file contains placeholders in Screenshots and Loom sections and must be completed before submission. -->
 # Credex AI Spend Audit
 
 ## Summary

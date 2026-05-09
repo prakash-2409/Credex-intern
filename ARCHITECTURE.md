@@ -1,3 +1,4 @@
+<!-- ⚠️ WARNING: This file contains placeholders and must be completed with real architecture details before submission. -->
 # Architecture
 
 ## Data Flow

@@ -1,3 +1,4 @@
+<!-- ⚠️ WARNING: This file contains placeholders ($XX.XX, YYYY-MM-DD) and must be completed with real pricing data before submission. -->
 # Pricing Data
 
 Every number must be verified against the official pricing page before submission.

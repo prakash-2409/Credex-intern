@@ -1,3 +1,4 @@
+<!-- ⚠️ WARNING: This file contains placeholders and must be completed with real content before submission. -->
 <!-- TODO: Fill this with honest daily notes only. Do not invent work. -->
 
 *** Day 1 - 2026-05-07 ***

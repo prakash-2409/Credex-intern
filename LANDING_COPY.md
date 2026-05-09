@@ -1,3 +1,4 @@
+<!-- ⚠️ WARNING: This file contains placeholders and must be completed with real landing copy before submission. -->
 # Landing Copy
 
 <!-- Delete prompts after filling with real copy. -->

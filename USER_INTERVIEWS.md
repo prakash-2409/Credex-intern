@@ -1,3 +1,4 @@
+<!-- ⚠️ WARNING: This file contains placeholders and must be completed with real user interview data before submission. -->
 Conduct 3 real 10-15 min conversations. Do not fabricate.
 
 ## Interview 1

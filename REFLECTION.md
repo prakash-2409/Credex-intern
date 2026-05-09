@@ -1,3 +1,4 @@
+<!-- ⚠️ WARNING: This file contains placeholders and must be completed with honest answers before submission. -->
 <!-- TODO: Answer these honestly after the project is complete. Do not fabricate. -->
 
 # Reflection

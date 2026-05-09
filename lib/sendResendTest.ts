@@ -1,4 +1,4 @@
-import type { Resend } from "resend";
+import type { Resend, CreateEmailOptions } from "resend";
 import { getResendClient } from "./resendClient";
 
 /**
@@ -16,16 +16,16 @@ export async function sendTestEmail(to = "you@example.com") {
   }
 
   // Note: `from` should be a verified/supported sender for your Resend account
-  const payload = {
+  const payload: CreateEmailOptions = {
     from: "onboarding@resend.dev",
     to,
     subject: "Hello World",
     html: "<p>Congrats on sending your <strong>first email</strong>!</p>",
-  } as const;
+  };
 
   // `client.emails.send(...)` returns a promise; surface the result for debugging.
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  const result = await (client as unknown as Resend).emails.send(payload as any);
+  const result = await (client as unknown as Resend).emails.send(payload);
   return result;
 }
 
